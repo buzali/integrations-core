@@ -1,2 +1,3 @@
+lxml==4.5.0
 pywin32==227; sys_platform == 'win32'
 uptime==3.0.1

@@ -16,6 +16,156 @@ instances:
 
   -
 
+    ## @param path - string - optional
+    ## The check will subscribe to the path for events. It can be one of the following:
+    ##
+    ##   - the name of an Admin or Operational channel (you cannot subscribe to Analytic or Debug channels)
+    ##   - the full path to a log file, usually ending in .evt, .evtx, or .etl
+    ##
+    ## The path is required if `legacy_mode` is set to `false`.
+    #
+    # path: <PATH>
+
+    ## @param start - string - optional - default: now
+    ## The point at which to start the event subscription.
+    ##
+    ## There are two choices:
+    ##
+    ##   - now: Subscribe to only future events that match the query criteria.
+    ##   - oldest: Subscribe to all existing and future events that match the query criteria.
+    ##
+    ## A bookmark will be periodically updated on the filesystem to resume the subscription
+    ## upon Agent restarts. The frequency with which the bookmark is updated can be controlled
+    ## with the `bookmark_frequency` option.
+    #
+    # start: now
+
+    ## @param query - string - optional
+    ## The raw XPath or structured XML query used to filter events.
+    ##
+    ##   /\ WARNING /\
+    ##   Queries translate to XML and therefore are case-sensitive.
+    ##
+    ## For detailed documentation, see the following resources:
+    ##
+    ##   - Examples > https://docs.microsoft.com/en-us/windows/win32/wes/consuming-events
+    ##   - Query Schema > https://docs.microsoft.com/en-us/windows/win32/wes/queryschema-schema
+    ##   - Event Schema > https://docs.microsoft.com/en-us/windows/win32/wes/eventschema-schema
+    ##
+    ## This overrides any selected `filters`.
+    #
+    # query: <QUERY>
+
+    ## @param filters - mapping - optional
+    ## A mapping of node paths to allowed values. Every filter (equivalent to the `and` operator) must
+    ## match any value (equivalent to the `or` operator).
+    ##
+    ##   /\ WARNING /\
+    ##   The node paths refer to XML elements and therefore are case-sensitive.
+    ##
+    ## For example, if you defined the following filters:
+    ##
+    ##   System.Level:
+    ##     - 1
+    ##     - 2
+    ##   UserData/LowOnMemory:
+    ##   System.EventID:
+    ##     - 4624
+    ##   EventData.Data.@Name='TargetUserName':
+    ##     - Picard
+    ##
+    ## then the resulting XPath query would be:
+    ##
+    ##   *[
+    ##     System[(Level=1 or Level=2) and (EventID=4624)]
+    ##     and UserData/LowOnMemory
+    ##     and EventData[Data[@Name='TargetUserName']='Picard']
+    ##    ]
+    ##
+    ## Notes:
+    ##
+    ##   1. You can select elements by themselves without values by excluding them (as the
+    ##      `UserData/LowOnMemory` example above shows) or setting them to an empty array.
+    ##   2. Node paths ending with an attribute condition can only have one value.
+    ##
+    ## For advanced and more granular filtering, define a `query`.
+    ##
+    ## If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
+    #
+    # filters: <FILTERS>
+
+    ## @param auth_type - string - optional - default: default
+    ## The type of authentication to use. The available types are:
+    ##
+    ##   - default
+    ##   - negotiate
+    ##   - kerberos
+    ##   - ntlm
+    #
+    # auth_type: default
+
+    ## @param server - string - optional - default: localhost
+    ## The name of the remote computer to connect to.
+    ##
+    ## If this is not selected or set to `localhost`, a connection to the
+    ## local machine will be established instead.
+    #
+    # server: localhost
+
+    ## @param user - string - optional
+    ## The user name to use to connect to the remote computer.
+    ##
+    ## If this, `password`, and `domain` are all unselected, then the credentials
+    ## of the current user will be used.
+    #
+    # user: <USER>
+
+    ## @param password - string - optional
+    ## The password for the user account.
+    ##
+    ## If this, `user`, and `domain` are all unselected, then the credentials
+    ## of the current user will be used.
+    #
+    # password: <PASSWORD>
+
+    ## @param domain - string - optional
+    ## The domain to which the user account belongs.
+    ##
+    ## If this, `user`, and `password` are all unselected, then the credentials
+    ## of the current user will be used.
+    #
+    # domain: <DOMAIN>
+
+    ## @param timeout - number - optional - default: 5
+    ## The number of seconds to wait for new event signals.
+    #
+    # timeout: 5
+
+    ## @param payload_size - integer - optional - default: 10
+    ## The number of events to request at a time.
+    ##
+    ## This is useful when connecting to remote machines with the `server` option.
+    #
+    # payload_size: 10
+
+    ## @param bookmark_frequency - integer - optional - default: <PAYLOAD_SIZE>
+    ## How often to save the last seen event as a factor of the number of seen events.
+    ## By default, the value of `payload_size` will be used.
+    ##
+    ## This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
+    #
+    # bookmark_frequency: <BOOKMARK_FREQUENCY>
+
+    ## @param legacy_mode - boolean - optional - default: true
+    ## Whether or not to use a mode of operation that is now unmaintained.
+    ##
+    ##   /\ WARNING /\
+    ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
+    ##
+    ## Support for this option will eventually be deprecated.
+    #
+    # legacy_mode: true
+
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote
     ## machine's event logs, specify the machine name (DCOM has to be enabled on
@@ -27,11 +177,6 @@ instances:
     ## If authentication is needed, specify a `username` here.
     #
     # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## If authentication is needed, specify a `password` here.
-    #
-    # password: <PASSWORD>
 
     ## @param event_priority - string - optional - default: normal
     ## Override default event priority by setting it per instance
